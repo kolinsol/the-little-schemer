@@ -1,5 +1,9 @@
+; ---------- CHAPTER 1 ----------
+
 (define (atom? x)
     (and (not (pair? x)) (not (null? x))))
+
+; ---------- CHAPTER 2 ----------
 
 (define (lat? xs)
   (cond
@@ -12,6 +16,8 @@
     ((null? xs) #f)
     ((eq? x (car xs)) #t)
     (else (member? x (cdr xs)))))
+
+; ---------- CHAPTER 3 ----------
 
 (define (rember x xs)
   (cond
@@ -77,3 +83,5 @@
     ((null? xs) '())
     ((eq? y (car xs)) (cons x (multisubst x y (cdr xs))))
     (else (cons (car xs) (multisubst x y (cdr xs))))))
+
+; ---------- CHAPTER 4 ----------
