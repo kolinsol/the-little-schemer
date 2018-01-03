@@ -32,3 +32,48 @@
     ((null? xs) '())
     ((eq? y (car xs)) (cons y (cons x (cdr xs))))
     (else (cons (car xs) (insertr x y (cdr xs))))))
+
+(define (insertl x y xs)
+  (cond
+    ((null? xs) '())
+    ((eq? y (car xs)) (cons x xs))
+    (else (cons (car xs) (insertl x y (cdr xs))))))
+
+(define (subst x y xs)
+  (cond
+    ((null? xs) '())
+    ((eq? y (car xs)) (cons x (cdr xs)))
+    (else (cons (car xs) (subst x y (cdr xs))))))
+
+;TODO (->) reimplement using (member?)
+(define (subst2 x y1 y2 xs)
+  (cond
+    ((null? xs) '())
+    ((or
+      (eq? (car xs) y1)
+      (eq? (car xs) y2)) (cons x (cdr xs)))
+    (else (cons (car xs) (subst2 x y1 y2 (cdr xs))))))
+
+(define (multirember x xs)
+  (cond
+    ((null? xs) '())
+    ((eq? x (car xs)) (multirember x (cdr xs)))
+    (else (cons (car xs) (multirember x (cdr xs))))))
+
+(define (multiinsertr x y xs)
+  (cond
+    ((null? xs) '())
+    ((eq? y (car xs)) (cons y (cons x (multiinsertr x y (cdr xs)))))
+    (else (cons (car xs) (multiinsertr x y (cdr xs))))))
+
+(define (multiinsertl x y xs)
+  (cond
+    ((null? xs) '())
+    ((eq? y (car xs)) (cons x (cons y (multiinsertl x y (cdr xs)))))
+    (else (cons (car xs) (multiinsertl x y (cdr xs))))))
+
+(define (multisubst x y xs)
+  (cond
+    ((null? xs) '())
+    ((eq? y (car xs)) (cons x (multisubst x y (cdr xs))))
+    (else (cons (car xs) (multisubst x y (cdr xs))))))
