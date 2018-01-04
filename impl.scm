@@ -209,4 +209,82 @@
 
 ; ---------- CHAPTER 5 ----------
 
+(define (remberrec x xs)
+  (cond
+    ((null? xs) '())
+    ((atom? (car xs))
+      (cond
+        ((eqan? x (car xs)) (remberrec x (cdr xs)))
+        (else (cons (car xs) (remberrec x (cdr xs))))))
+    (else (cons (remberrec x (car xs)) (remberrec x (cdr xs))))))
 
+(define (insertrrec x y xs)
+  (cond
+    ((null? xs) '())
+    ((atom? (car xs))
+      (cond
+        ((eqan? y (car xs)) (cons y (cons x (insertrrec x y (cdr xs)))))
+        (else (cons (car xs) (insertrrec x y (cdr xs))))))
+    (else (cons (insertrrec x y (car xs)) (insertrrec x y (cdr xs))))))
+
+(define (occurrec x xs)
+  (cond
+    ((null? xs) 0)
+    ((atom? (car xs))
+      (cond
+        ((eqan? x (car xs)) (add1 (occurrec x (cdr xs))))
+        (else (occurrec x (cdr xs)))))
+    (else (+ (occurrec x (car xs)) (occurrec x (cdr xs))))))
+
+(define (substrec x y xs)
+  (cond
+    ((null? xs) '())
+    ((atom? (car xs))
+      (cond
+        ((eqan? y (car xs)) (cons x (substrec x y (cdr xs))))
+        (else (cons (car xs) (substrec x y (cdr xs))))))
+    (else (cons (substrec x y (car xs)) (substrec x y (cdr xs))))))
+
+(define (insertlrec x y xs)
+  (cond
+    ((null? xs) '())
+    ((atom? (car xs))
+      (cond
+        ((eqan? y (car xs)) (cons x (cons y (insertlrec x y (cdr xs)))))
+        (else (cons (car xs) (insertlrec x y (cdr xs))))))
+    (else (cons (insertlrec x y (car xs)) (insertlrec x y (cdr xs))))))
+
+(define (memberrec x xs)
+  (cond
+    ((null? xs) #f)
+    ((atom? (car xs))
+      (cond
+        ((eqan? x (car xs)) #t)
+        (else (memberrec x (cdr xs)))))
+    (else (or (memberrec x (car xs)) (memberrec x (cdr xs))))))
+
+(define (leftmost xs)
+  (cond
+    ((null? xs) '())
+    (else
+      (cond
+        ((atom? (car xs)) (car xs))
+        (else (leftmost (car xs)))))))
+
+(define (eqlist? xs ys)
+  (cond
+    ((null? xs) (null? ys))
+    ((atom? (car xs))
+      (cond
+        ((atom? (car ys)) 
+          (and (eqan? (car xs) (car ys)) (eqlist? (cdr xs) (cdr ys))))
+        (else #f)))
+    (else (and (eqlist? (car xs) (car ys)) (eqlist? (cdr xs) (cdr ys))))))
+
+(define (equal? x y)
+  (cond
+    ((and (atom? x) (atom? y)) (eqan? x y))
+    ((or (atom? x) (atom? y)) #f)
+    (else (eqlist? x y))))
+
+; ---------- CHAPTER 6 ----------
