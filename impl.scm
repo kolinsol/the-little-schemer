@@ -14,7 +14,7 @@
 (define (member? x xs)
   (cond
     ((null? xs) #f)
-    ((eq? x (car xs)) #t)
+    ((equal? x (car xs)) #t)
     (else (member? x (cdr xs)))))
 
 ; ---------- chapter 3 ----------
@@ -22,33 +22,38 @@
 (define (rember x xs)
   (cond
     ((null? xs) xs)
-    ((eq? x (car xs)) (cdr xs))
+    ((equal? x (car xs)) (cdr xs))
     (else (cons (car xs) (rember x (cdr xs))))))
 
-(define (firsts xs)
+(define (fsts xs)
   (cond
     ((null? xs) '())
     (else 
       (cond
-        ((null? (car xs)) (cons '() (firsts (cdr xs))))
-        (else (cons (car (car xs)) (firsts (cdr xs))))))))
+        ((null? (car xs)) (cons '() (fsts (cdr xs))))
+        (else (cons (car (car xs)) (fsts (cdr xs))))))))
+
+(define (snds xs)
+  (cond
+    ((null? xs) '())
+    ((cons (snd (car xs)) (snds (cdr xs))))))
 
 (define (insertr x y xs)
   (cond
     ((null? xs) '())
-    ((eq? y (car xs)) (cons y (cons x (cdr xs))))
+    ((equal? y (car xs)) (cons y (cons x (cdr xs))))
     (else (cons (car xs) (insertr x y (cdr xs))))))
 
 (define (insertl x y xs)
   (cond
     ((null? xs) '())
-    ((eq? y (car xs)) (cons x xs))
+    ((equal? y (car xs)) (cons x xs))
     (else (cons (car xs) (insertl x y (cdr xs))))))
 
 (define (subst x y xs)
   (cond
     ((null? xs) '())
-    ((eq? y (car xs)) (cons x (cdr xs)))
+    ((equal? y (car xs)) (cons x (cdr xs)))
     (else (cons (car xs) (subst x y (cdr xs))))))
 
 ;todo (->) reimplement using (member?)
@@ -56,32 +61,32 @@
   (cond
     ((null? xs) '())
     ((or
-      (eq? (car xs) y1)
-      (eq? (car xs) y2)) (cons x (cdr xs)))
+      (equal? (car xs) y1)
+      (equal? (car xs) y2)) (cons x (cdr xs)))
     (else (cons (car xs) (subst2 x y1 y2 (cdr xs))))))
 
 (define (multirember x xs)
   (cond
     ((null? xs) '())
-    ((eq? x (car xs)) (multirember x (cdr xs)))
+    ((equal? x (car xs)) (multirember x (cdr xs)))
     (else (cons (car xs) (multirember x (cdr xs))))))
 
 (define (multiinsertr x y xs)
   (cond
     ((null? xs) '())
-    ((eq? y (car xs)) (cons y (cons x (multiinsertr x y (cdr xs)))))
+    ((equal? y (car xs)) (cons y (cons x (multiinsertr x y (cdr xs)))))
     (else (cons (car xs) (multiinsertr x y (cdr xs))))))
 
 (define (multiinsertl x y xs)
   (cond
     ((null? xs) '())
-    ((eq? y (car xs)) (cons x (cons y (multiinsertl x y (cdr xs)))))
+    ((equal? y (car xs)) (cons x (cons y (multiinsertl x y (cdr xs)))))
     (else (cons (car xs) (multiinsertl x y (cdr xs))))))
 
 (define (multisubst x y xs)
   (cond
     ((null? xs) '())
-    ((eq? y (car xs)) (cons x (multisubst x y (cdr xs))))
+    ((equal? y (car xs)) (cons x (multisubst x y (cdr xs))))
     (else (cons (car xs) (multisubst x y (cdr xs))))))
 
 ; ---------- chapter 4 ----------
@@ -281,6 +286,9 @@
         (else #f)))
     (else (and (eqlist? (car xs) (car ys)) (eqlist? (cdr xs) (cdr ys))))))
 
+; rewrote basic functions (like (member?), (renber))
+; with this implementation if (equal?)
+
 (define (equal? x y)
   (cond
     ((and (atom? x) (atom? y)) (eqan? x y))
@@ -339,3 +347,96 @@
     ((parzero? xs) #t)
     ((atom? xs) #f)
     (else (and (parlist? (car xs)) (parlist? (cdr xs))))))
+
+; ---------- CHAPTER 7 ----------
+
+(define (set? xs)
+  (cond
+    ((null? xs) #t)
+    ((member? (car xs) (cdr xs)) #f)
+    (else (set? (cdr xs)))))
+
+(define (makeset xs)
+  (cond
+    ((null? xs) '())
+    ((member? (car xs) (cdr xs)) 
+      (cons (car xs) (makeset (multirember (car xs) (cdr xs)))))
+    (else (cons (car xs) (makeset (cdr xs))))))
+
+(define (subset? xs ys)
+  (cond
+    ((null? xs) #t)
+    (else (and (member? (car xs) ys) (subset? (cdr xs) ys)))))
+
+(define (eqset? xs ys)
+  (and (subset? xs ys) (subset? ys xs)))
+
+(define (intersect? xs ys)
+  (cond
+    ((null? xs) #f)
+    (else (or (member? (car xs) ys) (intersect? (cdr xs) ys)))))
+
+(define (intersect xs ys)
+  (cond
+    ((null? xs) '())
+    ((member? (car xs) ys) (cons (car xs) (intersect (cdr xs) ys)))
+    (else (intersect (cdr xs) ys))))
+
+(define (union xs ys)
+  (cond
+    ((null? xs) ys)
+    ((member? (car xs) ys)
+      (cons (car xs) (union (cdr xs) (rember (car xs) ys))))
+    (else (cons (car xs) (union (cdr xs) ys)))))
+
+(define (diffl xs ys)
+  (cond
+    ((null? xs) '())
+    ((member? (car xs) ys) (diffl (cdr xs) ys))
+    (else (cons (car xs) (diffl (cdr xs) ys)))))
+
+; just for cinviniencz
+(define (diffr xs ys)
+  (diffl ys xs))
+
+(define (intersect-all xs)
+  (cond
+    ((null? xs) '())
+    ((null? (cdr xs)) (car xs))
+    (else (intersect (car xs) (intersect-all (cdr xs))))))
+
+(define (a-pair? x)
+  (cond
+    ((atom? x) #f)
+    ((null? x) #f)
+    ((null? (cdr x)) #f)
+    ((null? (cdr (cdr x))) #t)
+    (else #f)))
+
+(define (fst p)
+  (car p))
+
+(define (snd p)
+  (car (cdr p)))
+
+(define (pair a b)
+  (cons a (cons b '())))
+
+(define (rel? xs)
+  (cond
+    ((null? xs) #t)
+    (else (and (a-pair? (car xs)) (rel? (cdr xs))))))
+
+(define (funl? xs)
+  (and (rel? xs) (set? (fsts xs))))
+
+(define (funr? xs)
+  (funl? (rev-rel xs)))
+
+(define (rev-pair ab)
+  (pair (snd ab) (fst ab)))
+
+(define (rev-rel xs)
+  (cond
+    ((null? xs) '())
+    (else (cons (rev-pair (car xs)) (rev-rel (cdr xs))))))
