@@ -1,9 +1,9 @@
-; ---------- CHAPTER 1 ----------
+; ---------- chapter 1 ----------
 
 (define (atom? x)
     (and (not (pair? x)) (not (null? x))))
 
-; ---------- CHAPTER 2 ----------
+; ---------- chapter 2 ----------
 
 (define (lat? xs)
   (cond
@@ -17,7 +17,7 @@
     ((eq? x (car xs)) #t)
     (else (member? x (cdr xs)))))
 
-; ---------- CHAPTER 3 ----------
+; ---------- chapter 3 ----------
 
 (define (rember x xs)
   (cond
@@ -51,7 +51,7 @@
     ((eq? y (car xs)) (cons x (cdr xs)))
     (else (cons (car xs) (subst x y (cdr xs))))))
 
-;TODO (->) reimplement using (member?)
+;todo (->) reimplement using (member?)
 (define (subst2 x y1 y2 xs)
   (cond
     ((null? xs) '())
@@ -84,7 +84,7 @@
     ((eq? y (car xs)) (cons x (multisubst x y (cdr xs))))
     (else (cons (car xs) (multisubst x y (cdr xs))))))
 
-; ---------- CHAPTER 4 ----------
+; ---------- chapter 4 ----------
 
 (define (add1 x)
   (+ x 1))
@@ -207,7 +207,7 @@
 (define (one? x)
   (zero? (sub1 x)))
 
-; ---------- CHAPTER 5 ----------
+; ---------- chapter 5 ----------
 
 (define (remberrec x xs)
   (cond
@@ -287,4 +287,55 @@
     ((or (atom? x) (atom? y)) #f)
     (else (eqlist? x y))))
 
-; ---------- CHAPTER 6 ----------
+; ---------- chapter 6 ----------
+
+(define ^ expt)
+
+(define (numbered? xs)
+  (cond
+    ((null? xs) #t)
+    ((atom? xs) (number? xs))
+    ((member? (car (cdr xs)) '(+ * ^))
+      (and
+        (numbered? (car xs))
+        (numbered? (car (cdr (cdr xs))))))
+    (else #f)))
+
+(define (value x)
+  (cond
+    ((atom? x) x)
+    ((equal? (expr-op x) '+)
+      (+ (value (expr-argl x)) (value (expr-argr x))))
+    ((equal? (expr-op x) '*)
+      (* (value (expr-argl x)) (value (expr-argr x))))
+    ((equal? (expr-op x) '^)
+      (^ (value (expr-argl x)) (value (expr-argr x))))))
+
+(define (expr-argl xs)
+  (car (cdr xs)))
+
+(define (expr-argr xs)
+  (car (cdr (cdr xs))))
+
+(define (expr-op xs)
+  (car xs))
+
+(define (parzero? x)
+  (null? x))
+
+(define (paradd1 xs)
+  (cons '() xs))
+
+(define (parsub1 xs)
+  (cdr xs))
+
+(define (parplus xs ys)
+  (cond
+    ((parzero? xs) ys)
+    (else (cons (car xs) (parplus (cdr xs) ys)))))
+
+(define (parlist? xs)
+  (cond
+    ((parzero? xs) #t)
+    ((atom? xs) #f)
+    (else (and (parlist? (car xs)) (parlist? (cdr xs))))))
