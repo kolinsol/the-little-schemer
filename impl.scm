@@ -440,3 +440,149 @@
   (cond
     ((null? xs) '())
     (else (cons (rev-pair (car xs)) (rev-rel (cdr xs))))))
+
+; ---------- CHAPTER 8 ----------
+
+(define (rember-f test? x xs)
+  (cond
+    ((null? xs) '())
+    ((test? x (car xs)) (rember-f test? x (cdr xs)))
+    (else (cons (car xs) (rember-f test? x (cdr xs))))))
+
+(define (equal?-c a)
+  (lambda (b)
+    (equal? a b)))
+
+(define equal-10?
+  (equal?-c 10))
+
+(define rember-f-c
+  (lambda (test?)
+    (lambda (x xs)
+      (cond
+        ((null? xs) '())
+        ((test? x (car xs)) ((rember-f-c test?) x (cdr xs)))
+        (else (cons (car xs) ((rember-f-c test?) x (cdr xs))))))))
+
+(define list-rec
+  (lambda (cons-side)
+    (lambda (x y xs)
+      (cond
+        ((null? xs) '())
+        ((equal? y (car xs)) 
+          (cons-side x (car xs) ((list-rec cons-side) x y (cdr xs))))
+        (else (cons (car xs) ((list-rec cons-side) x y (cdr xs))))))))
+
+(define (cons-l a b c)
+  (cons a (cons b c)))
+
+(define (cons-r a b c)
+  (cons b (cons a c)))
+
+(define (cons-s a b c)
+  (cons a c))
+
+(define (cons-d a b c) c)
+
+(define insert-r-c (list-rec cons-r))
+
+(define insert-l-c (list-rec cons-l))
+
+(define subst-c (list-rec cons-s))
+
+(define (rember-c x xs) 
+  ((list-rec cons-d) #f x xs))
+
+(define (get-op op)
+  (cond
+    ((equal? op '+) +)
+    ((equal? op '*) *)
+    ((equal? op '^) ^)))
+
+(define value-g
+  (lambda (argl op argr)
+    (lambda (x)
+      (cond
+        ((atom? x) x)
+        (else
+          ((get-op (op x)) 
+            ((value-g argl op argr) (argl x))
+            ((value-g argl op argr) (argr x))))))))
+
+(define value-infix
+  (value-g
+    (lambda (x) (car x))
+    (lambda (x) (car (cdr x)))
+    (lambda (x) (car (cdr (cdr x))))))
+
+(define value-prefix
+  (value-g
+    (lambda (x) (car (cdr x)))
+    (lambda (x) (car x))
+    (lambda (x) (car (cdr (cdr x))))))
+
+(define value-postfix
+  (value-g
+    (lambda (x) (car x))
+    (lambda (x) (car (cdr (cdr x))))
+    (lambda (x) (car (cdr x)))))
+
+(define (multi-rember-col x xs col)
+  (cond
+    ((null? xs) (col 0 '()))
+    ((equal? x (car xs))
+      (multi-rember-col x (cdr xs)
+        (lambda (rem res)
+          (col (add1 rem) res))))
+    (else
+      (multi-rember-col x (cdr xs)
+        (lambda (rem res)
+          (col rem (cons (car xs) res)))))))
+
+(define (multi-insert-l-r x l r xs)
+  (cond
+    ((null? xs) '())
+    ((equal? l (car xs)) (cons x (cons l (multi-insert-l-r x l r (cdr xs)))))
+    ((equal? r (car xs)) (cons r (cons x (multi-insert-l-r x l r (cdr xs)))))
+    (else (cons (car xs) (multi-insert-l-r x l r (cdr xs))))))
+
+(define (multi-insert-l-r-col x l r xs col)
+  (cond
+    ((null? xs) (col '() 0 0))
+    ((equal? l (car xs))
+      (multi-insert-l-r-col x l r (cdr xs)
+        (lambda (list ls rs)
+          (col (cons x (cons l list)) (add1 ls) rs))))
+    ((equal? r (car xs))
+      (multi-insert-l-r-col x l r (cdr xs)
+        (lambda (list ls rs)
+          (col (cons r (cons x list)) ls (add1 rs)))))
+    (else
+      (multi-insert-l-r-col x l r (cdr xs)
+        (lambda (list ls rs)
+          (col (cons (car xs) list) ls rs))))))
+
+(define (evens xs)
+  (cond
+    ((null? xs) '())
+    ((atom? (car xs))
+      (cond
+        ((even? (car xs)) (cons (car xs) (evens (cdr xs))))
+        (else (evens (cdr xs)))))
+    (else (cons (evens (car xs)) (evens (cdr xs))))))
+
+(define (evens-col xs col)
+  (cond
+    ((null? xs) (col '() 1 0))
+    ((atom? (car xs))
+      (cond
+        ((even? (car xs))
+          (evens-col (cdr xs) (lambda (l p s)
+            (col (cons (car xs) l) (* (car xs) p) s))))
+        (else (evens-col (cdr xs) (lambda (l p s)
+          (col l p (+ (car xs) s)))))))
+    (else (evens-col (car xs)
+      (lambda (il ip is)
+        (evens-col (cdr xs)
+          (lambda (ol op os)
+            (col (cons il ol) (* ip op) (+ is os)))))))))
