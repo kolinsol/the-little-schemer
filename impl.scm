@@ -571,6 +571,8 @@
         (else (evens (cdr xs)))))
     (else (cons (evens (car xs)) (evens (cdr xs))))))
 
+; practice this pattern more
+
 (define (evens-col xs col)
   (cond
     ((null? xs) (col '() 1 0))
@@ -586,3 +588,84 @@
         (evens-col (cdr xs)
           (lambda (ol op os)
             (col (cons il ol) (* ip op) (+ is os)))))))))
+
+; ---------- CHAPTER 9 ----------
+
+(define (keep-looking x y xs)
+  (cond
+    ((number? y) (keep-looking x (pick y xs) xs))
+    (else (equal? x y))))
+
+(define (looking x xs)
+  (keep-looking x (pick 1 xs) xs))
+
+(define (shift list)
+  (pair (fst (fst list)) (pair (snd (fst list)) (snd list))))
+
+(define (align para)
+  (cond
+    ((atom? para) para)
+    ((pair? (fst para)) (align (shift para)))
+    (else (pair (fst para) (align (snd para))))))
+
+(define (p-length p)
+  (cond
+    ((atom? p) 1)
+    (else (+ (p-length (fst p)) (p-length (snd p))))))
+
+(define (p-weight p)
+  (cond
+    ((atom? p) 1)
+    (else (+ (* (p-weight (fst p)) 2) (p-weight (snd p))))))
+
+(define (shuffle p)
+  (cond
+    ((atom? p) p)
+    ((pair? (fst p)) (shuffle (rev-pair p)))
+    (else (pair (fst p) (shuffle (snd p))))))
+
+(define (c x)
+  (cond
+    ((one? x) 1)
+    ((even? x) (c (/ x 2)))
+    (else (add1 (* 3 x)))))
+
+(define (a x y)
+  (cond
+    ((zero? x) (add1 y))
+    ((zero? y) (a (sub1 x) 1))
+    (else (a (sub1 x) (a x (sub1 y))))))
+
+(define (eternity x)
+  (eternity x))
+
+; length-0
+(lambda (l)
+  (cond
+    ((null? l) 0)
+    (else (add1 (eternity (cdr l))))))
+
+; langth-<=1
+(lambda (l)
+  (cond
+    ((null? l) 0)
+    (else (add1
+      ((lambda (l)
+        (cond
+          ((null? l) 0)
+          (else (add1 (eternity (cdr l)))))) (cdr l))))))
+
+; recursive length without (define)
+; (((lambda (f) (f f))
+;   (lambda (f)
+;     (lambda (l)
+;       (cond
+;         ((null? l) 0)
+;         (else (add1 ((f f) (cdr l)))))))))
+
+; APPLICATIVE-ORDER Y COMBINATOR
+(define Y
+  (lambda (le)
+    ((lambda (f) (f f))
+     (lambda (f)
+       (le (lambda (x) ((f f) x)))))))
